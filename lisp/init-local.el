@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(windmove-default-keybindings)
+;; tools
 (delete-selection-mode t)
 
 (defun osx-copy (beg end)
@@ -25,7 +25,6 @@
       (if (region-active-p)
           (flush-lines empty-line beg end)
         (flush-lines empty-line (point-min) (point-max))))))
-
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
   "Renames both current buffer and file it's visiting to NEW-NAME."
@@ -40,33 +39,45 @@
       (set-visited-file-name new-name)
       (rename-buffer new-name))))
 
+;; editing
 (require-package 'ctrlf)
+(require-package 'ace-window)
+(require 'edit-autosave)
+
 (defface ctrlf-highlight-active
   '((t (:weight bold :foreground "medium blue" :background "#5AC896")))
   "ctrlf highlight active face")
 (ctrlf-mode 1)
 
-
+;; keybinding
 (add-to-list 'load-path "site-lisp/xah-fly-keys")
 (setq xah-fly-use-meta-key nil
       xah-fly-use-control-key nil)
 
 (require 'xah-fly-keys)
-(require 'edit-autosave)
 
 (xah-fly-keys-set-layout "qwerty")
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (define-key xah-fly-command-map (kbd "2") 'delete-window)
 (define-key xah-fly-command-map (kbd "M-<SPC>") nil)
 (define-key xah-fly-command-map (kbd "'") 'avy-goto-line)
+(define-key xah-fly-command-map (kbd ",") 'ace-window)
 (define-key xah-fly-command-map (kbd "C-'") 'avy-goto-char)
 (define-key xah-fly-insert-map (kbd "M-<SPC>") 'xah-fly-command-mode-activate)
 (define-key xah-fly-leader-key-map (kbd "r") 'anzu-query-replace)
 
+(global-set-key (kbd "C-c r") 'consult-ripgrep)
+
 (xah-fly-keys 1)
 
+;; mac configure
 (setq mac-command-modifier 'super)
 (setq mac-option-modifier 'meta)
+
+;; C/C++ mode configure
+(setq c-basic-offset 4)
+(add-to-list 'c-mode-hook 'aggressive-indent-mode)
+(add-to-list 'c++-mode-hook 'aggressive-indent-mode)
 
 (provide 'init-local)
 
