@@ -76,8 +76,8 @@
 
 ;; C/C++ mode configure
 (setq c-basic-offset 4)
-(add-to-list 'c-mode-hook #'aggressive-indent-mode)
-(add-to-list 'c++-mode-hook #'aggressive-indent-mode)
+(add-hook 'c-mode-hook #'aggressive-indent-mode)
+(add-hook 'c++-mode-hook #'aggressive-indent-mode)
 
 (global-whitespace-cleanup-mode 0)
 
