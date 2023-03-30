@@ -77,7 +77,7 @@
 (require 'init-vc)
 (require 'init-darcs)
 (require 'init-git)
-(require 'init-github)
+;; (require 'init-github)
 
 (require 'init-projectile)
 
@@ -127,9 +127,6 @@
 
 (require 'init-folding)
 (require 'init-dash)
-
-(require 'init-ledger)
-(require 'init-lua)
 
 ;; Extra packages which don't require any configuration
 
