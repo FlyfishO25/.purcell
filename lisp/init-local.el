@@ -9,6 +9,12 @@
 ;; packages
 (require-package 'ctrlf)
 (require-package 'ace-window)
+(require-package 'prescient)
+(require-package 'corfu-prescient)
+(require-package 'popper)
+(require-package 'vertico-prescient)
+
+(setq +modeline-xah-status " C ")
 
 ;; tools
 (delete-selection-mode t)
@@ -89,6 +95,40 @@
 
 (global-set-key (kbd "C-c r") 'consult-ripgrep)
 
+(defface +modeline-meta-active-face
+  '((t (:inherit (font-lock-function-name-face bold) :inverse-video t)))
+  "Face used for meta panel on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-meta-inactive-face
+  '((t (:inherit (bold font-lock-function-name-face))))
+  "The face for meta panel on the mode-line of an inactive window."
+  :group '+modeline)
+
+(defun my-config-xah-fly-key-command ()
+  "Modify keys for xah fly key command mode keys
+to be added to `xah-fly-command-mode-activate-hook'"
+  (interactive)
+  (setq +modeline-xah-status " C ")
+  (set-face-foreground '+modeline-meta-active-face "#e78c45")
+  (set-face-foreground '+modeline-meta-inactive-face "#e78c45")
+  ;; more here
+  )
+
+(defun my-config-xah-fly-key-insert ()
+  "Modify keys for xah fly key command mode keys
+to be added to `xah-fly-insert-mode-activate-hook'"
+  (interactive)
+  (setq +modeline-xah-status " I ")
+  (set-face-foreground '+modeline-meta-active-face "#5AC896")
+  (set-face-foreground '+modeline-meta-inactive-face "#5AC896")
+  ;; more here
+  )
+
+
+(add-hook 'xah-fly-command-mode-activate-hook 'my-config-xah-fly-key-command)
+(add-hook 'xah-fly-insert-mode-activate-hook 'my-config-xah-fly-key-insert)
+
 (xah-fly-keys 1)
 
 ;; mac configure
@@ -111,129 +151,310 @@
   (corfu-terminal-mode +1))
 
 ;; mode-line
-(defun roife/ml/shortened-path (path max-len)
-  (let* ((components (split-string (abbreviate-file-name path) "/"))
-         (len (+ (1- (length components))
-                 (reduce '+ components :key 'length)))
-         (str ""))
-    (while (and (> len max-len)
-                (cdr components))
-      (setq str (concat str (if (= 0 (length (car components)))
-                                "/"
-                              (string (elt (car components) 0) ?/)))
-            len (- len (1- (length (car components))))
-            components (cdr components)))
-    (concat str (reduce (lambda (a b) (concat a "/" b)) components))))
+;;; Get current window
+(defvar +modeline-current-window nil)
+(defun +modeline-set-selected-window (&rest _)
+  "Set `+modeline-current-window' appropriately."
+  (let ((win (frame-selected-window)))
+    (setq +modeline-current-window
+          (if (minibuffer-window-active-p win)
+              (minibuffer-selected-window)
+            win))))
 
-(defun roife/ml/mode-info ()
-  (let ((info (cond ((derived-mode-p 'calc-mode) (prin1-to-string calc-angle-mode))
-                    (t nil))))
-    (if info (concat " [" (propertize info 'face '(:foreground "#cc6666")) "]")))
+(defsubst +modeline-window-active-p ()
+  "Whether is an active window."
+  (eq (frame-selected-window) +modeline-current-window))
+(add-hook 'pre-redisplay-functions #'+modeline-set-selected-window)
+
+;;; Check whether `window-total-width' is larger than the limit
+(defconst +modeline-window-width-limit 90)
+(defvar-local +modeline-large-width-p nil)
+(defun +modeline-window-size-change-function (&rest _)
+  "Function for `window-size-change-functions'."
+  (setq +modeline-large-width-p
+        (> (window-total-width) +modeline-window-width-limit)))
+(add-hook 'after-revert-hook #'+modeline-window-size-change-function)
+(add-hook 'buffer-list-update-hook #'+modeline-window-size-change-function)
+(add-hook 'window-size-change-functions #'+modeline-window-size-change-function)
+
+;;;; face
+(defgroup +modeline nil
+  "Modeline faces."
+  :group 'faces)
+
+(defface +modeline-line-number-active-face
+  '((t (:inherit (mode-line-inactive) :inverse-video t)))
+  "The face for line number on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-vc-mode-active-face
+  '((t (:inherit (font-lock-constant-face))))
+  "The face for vc-mode on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-modification-active-face
+  '((t (:inherit (font-lock-function-name-face))))
+  "The face for modification indicator on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-project-name-active-face
+  '((t (:inherit (bold font-lock-variable-name-face))))
+  "The face for project name on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-project-name-inactive-face
+  '((t (:inherit (mode-line-inactive))))
+  "The face for project name on the mode-line of an inactive window."
+  :group '+modeline)
+
+(defface +modeline-buffer-name-active-face
+  '((t (:inherit (font-lock-function-name-face bold))))
+  "The face for buffer name on the mode-line of an active window."
+  :group '+modeline)
+
+(defface +modeline-buffer-name-inactive-face
+  '((t (:inherit (mode-line-inactive bold))))
+  "The face for buffer name on the mode-line of an inactive window."
+  :group '+modeline)
+
+(defface +modeline-host-name-active-face
+  '((t (:inherit (font-lock-function-name-face bold italic))))
+  "The face for host name on the mode-line of an active window."
+  :group '+modeline)
+
+;;; Indicators
+(with-eval-after-load 'popper
+  ;; modeline indicator
+  (setq popper-mode-line
+        '(:propertize " POP |"
+                      face +modeline-meta-active-face)))
+
+(defsubst +modeline-macro-indicator ()
+  "Display current Emacs macro being recorded."
+  (cond (defining-kbd-macro "| MacroDef ")
+        (executing-kbd-macro "| MacroExc ")))
+
+(defsubst +modeline-multiple-cursors-indicator ()
+  "Display the number of multiple cursors."
+  (when (bound-and-true-p multiple-cursors-mode)
+    (format "| %d cursors " (mc/num-cursors))))
+
+(defsubst +modeline-use-region-indicator ()
+  "Display selected region in current buffer."
+  (when (use-region-p)
+    (format "| L%d W%d C%d "
+            (count-lines (region-beginning) (region-end))
+            (count-words (region-beginning) (region-end))
+            (abs (- (mark t) (point))))))
+
+(defsubst +modeline-overwrite-indicator ()
+  "Display whether it is in overwrite mode."
+  (when overwrite-mode "| Ovr "))
+
+(defsubst +modeline-symbol-overlay-indicator ()
+  "Display the number of matches for symbol overlay."
+  (when (and (bound-and-true-p symbol-overlay-keywords-alist)
+             (not (bound-and-true-p symbol-overlay-temp-symbol)))
+    (let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t)))
+           (symbol (car keyword))
+           (before (symbol-overlay-get-list -1 symbol))
+           (after (symbol-overlay-get-list 1 symbol))
+           (count (length before)))
+      (if (symbol-overlay-assoc symbol)
+          (format (concat  "| %d/%d sym " (and (cadr keyword) "in scope "))
+                  (+ count 1)
+                  (+ count (length after)))))))
+
+
+;;; Cache project name
+(defvar-local +modeline-project-name nil)
+(defsubst +modeline-update-project-name ()
+  "Get project name for current buffer."
+  (setq +modeline-project-name
+        (when (buffer-file-name)
+          (when-let ((project (project-current)))
+            (concat
+             (file-name-nondirectory
+              (directory-file-name (project-root project)))
+             ":")))))
+(add-hook 'find-file-hook #'+modeline-update-project-name)
+(add-hook 'after-change-major-mode-hook #'+modeline-update-project-name)
+
+;;; Cache remote host name
+(defvar-local +modeline-remote-host-name nil)
+(defsubst +modeline-update-remote-host-name ()
+  "Hostname for remote buffers."
+  (setq +modeline-remote-host-name
+        (when-let ((hostname (and default-directory
+                                  (file-remote-p default-directory 'host))))
+          (when (not (string-equal hostname "localhost"))
+            (format "@%s" hostname)))
+        ))
+(add-hook 'find-file-hook #'+modeline-update-remote-host-name)
+
+;;; Cache flymake report
+(defvar-local +modeline-flymake-indicator nil)
+(defun +modeline-flymake-update (&rest _)
+  "Display flymake info for current buffer."
+  (setq +modeline-flymake-indicator
+        (when (and flymake-mode (flymake-running-backends))
+          (let* ((err-count (cadadr (flymake--mode-line-counter :error t)))
+                 (warning-count (cadadr (flymake--mode-line-counter :warning t)))
+                 (note-count (cadadr (flymake--mode-line-counter :note t)))
+                 (err (when err-count (propertize err-count 'face '(:inherit compilation-error))))
+                 (warning (when warning-count (propertize (concat " " warning-count) 'face '(:inherit compilation-warning))))
+                 (note (when note-count (propertize (concat " " note-count) 'face '(:inherit compilation-info)))))
+            (concat " [" err warning note "]"))))
   )
+(advice-add #'flymake--handle-report :after #'+modeline-flymake-update)
+(add-hook 'flymake-mode-hook #'+modeline-flymake-update)
 
-(defvar roife/ml/selected-window nil)
-(add-hook 'post-command-hook '(lambda () (setq roife/ml/selected-window (selected-window))))
-(add-hook 'buffer-list-update-hook '(lambda () (force-mode-line-update)))
-(defun roife/ml/selected-window-p (x y)
-  "Return X if the current window is selected, if not, return Y."
-  (if (eq roife/ml/selected-window (selected-window)) x y))
+;;; Cache encoding info
+(defvar-local +modeline-encoding nil)
+(defsubst +modeline-update-encoding (&rest _)
+  "Get encoding and EOL type of current buffer."
+  (setq +modeline-encoding
+        `(,(if (memq (coding-system-category buffer-file-coding-system)
+                     '(coding-category-undecided coding-category-utf-8))
+               "UTF-8"
+             (upcase (symbol-name (coding-system-get buffer-file-coding-system :name))))
+          ,(pcase (coding-system-eol-type buffer-file-coding-system)
+             (0 ":LF ")
+             (1 ":CRLF ")
+             (2 ":CR ")
+             (_ " ")))))
+(add-hook 'find-file-hook #'+modeline-update-encoding)
+(advice-add #'after-insert-file-set-coding :after #'+modeline-update-encoding)
+(advice-add #'set-buffer-file-coding-system :after #'+modeline-update-encoding)
 
-(defun roife/ml/fill (face reserve)
-  "Return empty space using FACE and leaving RESERVE space on the right."
-  (unless reserve
-    (setq reserve 20))
-  (when (and window-system (eq 'right (get-scroll-bar-mode)))
-    (setq reserve (- reserve 3)))
-  (propertize " "
-              'display `((space :align-to
-                                (- (+ right right-fringe right-margin) ,reserve)))
-              'face face))
-
-(defun roife/ml/flycheck-lighter (state)
-  "Return flycheck information for the given error type STATE."
-  (let* ((counts (flycheck-count-errors flycheck-current-errors))
-         (errorp (flycheck-has-current-errors-p state))
-         (err (or (cdr (assq state counts)) "?"))
-         (running (eq 'running flycheck-last-status-change)))
-    (if (or errorp running) (format "•%s " err))))
-
-(defun roife/ml/compute-mode-line ()
-  (let* ((left (list
-                ;; file
-                " %* %I "
-                '(:eval (propertize (if overwrite-mode "Ovr " "") 'face '(:foreground "#f0c674")))
-                '(:eval (propertize
-                         (if (and (buffer-file-name) (projectile-project-p))
-                             (roife/ml/shortened-path (file-relative-name buffer-file-name (projectile-project-root)) 15)
-                           "%b")
-                         'face `(:weight ,(roife/ml/selected-window-p 'bold 'normal)
-                                         :foreground ,(roife/ml/selected-window-p "#b5bd68" "#969896"))))
-                " "
-
+(defsubst +mode-line-active-long ()
+  "Formatting active-long modeline."
+  (let* ((lhs `((:propertize +modeline-xah-status
+                             face +modeline-meta-active-face)
+                (:propertize ,(when (+modeline-window-active-p)
+                                (concat (+modeline-macro-indicator)
+                                        ;; (+modeline-anzu-indicator)
+                                        (+modeline-multiple-cursors-indicator)
+                                        (+modeline-symbol-overlay-indicator)
+                                        (+modeline-use-region-indicator)
+                                        (+modeline-overwrite-indicator)))
+                             face +modeline-meta-active-face)
+                (:propertize " %*" face +modeline-modification-active-face)
+                " %I "
+                (:propertize +modeline-project-name
+                             face +modeline-project-name-active-face)
+                (:propertize "%b" face +modeline-buffer-name-active-face)
+                (:propertize +modeline-remote-host-name
+                             face +modeline-host-name-active-face)
+                (:propertize vc-mode
+                             face +modeline-vc-mode-active-face)
                 ))
+         (rhs '(
+                (:propertize mode-name
+                             face +modeline-buffer-name-active-face)
+                (:eval +modeline-flymake-indicator)
+                " "
+                (:eval +modeline-encoding)
+                (:propertize " %l,%C "
+                             face +modeline-line-number-active-face)
+                " "
+                (-3 "%p")
+                "%%"))
+         (rhs-str (format-mode-line rhs))
+         (rhs-w (string-width rhs-str)))
+    `(,lhs
+      ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
+      ,rhs-str)))
 
-         (center (list
-                  ;; projectile
-                  '(:eval (when (and (buffer-file-name) (projectile-project-p))
-                            (concat "["(propertize (projectile-project-name)
-                                                   'face `(:foreground ,(roife/ml/selected-window-p "#81a2be" "#969896")))
-                                    "] ")))
-                  ;; major-mode
-                  '(:eval (propertize "%m" 'face `(:foreground ,(roife/ml/selected-window-p "#b294bb" "#969896"))))
-                  '(:eval (roife/ml/mode-info))
-                  ;; flycheck
-                  '(:eval
-                    (when (and (bound-and-true-p flycheck-mode)
-                               (or flycheck-current-errors
-                                   (eq 'running flycheck-last-status-change)))
-                      (concat
-                       " "
-                       (propertize " " 'face '(:background "#282a2e"))
-                       (cl-loop for state in '((error . "#cc6666")
-                                               (warning . "#de935f")
-                                               (info . "#8abeb7"))
-                                as lighter = (roife/ml/flycheck-lighter (car state))
-                                when lighter
-                                concat (propertize
-                                        lighter
-                                        'face `(:foreground ,(cdr state)
-                                                            :background "#282a2e")))
-                       )))
-                  ;; git
-                  '(:eval vc-mode)
-                  ;; selected
-                  " "
-                  '(:eval (when (and (use-region-p) (roife/ml/selected-window-p t nil))
-                            (concat
-                             (propertize (format " C:%d W:%d L:%d "
-                                                 (abs (- (mark t) (point)))
-                                                 (count-words (region-beginning) (region-end))
-                                                 (count-lines (region-beginning) (region-end)))
-                                         'face '(:background "#969896" :foreground "#1D1F21"))
-                             " ")))
-                  ))
-         (right (list
-                 ;; encoding
-                 '(:eval (propertize (let ((buf-coding (format "%s" buffer-file-coding-system)))
-                                       (if (string-match "\\(dos\\|unix\\|mac\\)" buf-coding)
-                                           (match-string 1 buf-coding)
-                                         buf-coding))))
-                 " "
-                 ;; position
-                 '(:eval (propertize " %l: %C " 'face `(:background ,(roife/ml/selected-window-p "#969896" "#373b41")
-                                                                    :foreground ,(roife/ml/selected-window-p "#1d1f21" "#c5c8c6"))))
-                 " "
-                 '(-3 "%p")
-                 " "
-                 ))
-         (fill-space (roife/ml/fill 'mode-line (string-width (format-mode-line right))))
-         (width-lcr (string-width (format-mode-line (list left center right))))
-         (width-lr (string-width (format-mode-line (list left right)))))
-    (cond ((> width-lr (window-width)) (list left))
-          ((> width-lcr (window-width)) (list left fill-space right))
-          (t (list left center fill-space right)))
-    ))
-(setq-default mode-line-format '(:eval (roife/ml/compute-mode-line)))
+
+(defsubst +mode-line-inactive-long ()
+  "Formatting active-long modeline."
+  (let* ((lhs `((:propertize +modeline-xah-status
+                             face +modeline-meta-inactive-face)
+                "%* %I "
+                (:propertize +modeline-project-name
+                             face +modeline-project-name-inactive-face)
+                (:propertize "%b" face +modeline-buffer-name-active-face)
+                (:propertize +modeline-remote-host-name
+                             face +modeline-host-name-active-face)
+                (:eval vc-mode)
+                ))
+         (rhs '((:eval mode-name)
+                " "
+                (:eval +modeline-encoding)
+                "%l,%C "
+                (-3 "%p")
+                "%%"))
+         (rhs-str (format-mode-line rhs))
+         (rhs-w (string-width rhs-str)))
+    `(,lhs
+      ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
+      ,rhs-str)))
+
+
+(defsubst +mode-line-active-short ()
+  "Formatting active-long modeline."
+  (let* ((lhs `((:propertize +modeline-xah-status
+                             face +modeline-meta-active-face)
+                (:propertize ,(when (+modeline-window-active-p)
+                                (concat (+modeline-macro-indicator)
+                                        ;; (+modeline-anzu-indicator)
+                                        (+modeline-multiple-cursors-indicator)
+                                        (+modeline-symbol-overlay-indicator)
+                                        (+modeline-use-region-indicator)
+                                        (+modeline-overwrite-indicator)))
+                             face +modeline-meta-active-face)
+                (:propertize " %*" face +modeline-modification-active-face)
+                " "
+                (:propertize "%b" face +modeline-buffer-name-active-face)
+                (:propertize +modeline-remote-host-name
+                             face +modeline-host-name-active-face)
+                ))
+         (rhs '(
+                (:propertize mode-name
+                             face +modeline-buffer-name-active-face)
+                " "
+                (:eval +modeline-encoding)
+                (:propertize " %l "
+                             face +modeline-line-number-active-face)
+                " "
+                (-3 "%p")
+                "%%"))
+         (rhs-str (format-mode-line rhs))
+         (rhs-w (string-width rhs-str)))
+    `(,lhs
+      ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
+      ,rhs-str)))
+
+(defsubst +mode-line-inactive-short ()
+  "Formatting active-long modeline."
+  (let* ((lhs `((:propertize +modeline-xah-status
+                             face +modeline-meta-inactive-face)
+                "%* "
+                (:propertize "%b" face +modeline-buffer-name-active-face)
+                (:propertize +modeline-remote-host-name
+                             face +modeline-host-name-active-face)
+                ))
+         (rhs '(" %l  "
+                (-3 "%p")
+                "%%"))
+         (rhs-str (format-mode-line rhs))
+         (rhs-w (string-width rhs-str)))
+    `(,lhs
+      ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
+      ,rhs-str)))
+
+(setq-default mode-line-format
+              '((:eval (if (+modeline-window-active-p)
+                           (if +modeline-large-width-p (+mode-line-active-long) (+mode-line-active-short))
+                         (if +modeline-large-width-p (+mode-line-inactive-long) (+mode-line-inactive-short))))))
+
+(setq-default header-line-format nil)
+
+(vertico-reverse-mode)
+(vertico-prescient-mode)
+(add-hook 'corfu-mode-hook #'corfu-prescient-mode)
+(prescient-persist-mode)
 
 (provide 'init-local)
 
