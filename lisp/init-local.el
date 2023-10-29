@@ -142,6 +142,7 @@ to be added to `xah-fly-insert-mode-activate-hook'"
 
 (global-whitespace-cleanup-mode 0)
 (whitespace-cleanup-mode 0)
+(add-hook 'after-init-hook (lambda () (windmove-default-keybindings)))
 
 (setq-default initial-scratch-message
               (concat ";; Happy hacking, " user-login-name " - Emacs ♥ you!\n" (format ";; Init completed in %.2fms"
