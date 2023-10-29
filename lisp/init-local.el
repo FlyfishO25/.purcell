@@ -141,6 +141,7 @@ to be added to `xah-fly-insert-mode-activate-hook'"
 (add-hook 'c++-mode-hook #'aggressive-indent-mode)
 
 (global-whitespace-cleanup-mode 0)
+(whitespace-cleanup-mode 0)
 
 (setq-default initial-scratch-message
               (concat ";; Happy hacking, " user-login-name " - Emacs ♥ you!\n" (format ";; Init completed in %.2fms"

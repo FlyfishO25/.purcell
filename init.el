@@ -102,7 +102,7 @@
 ;;(require 'init-ruby)
 ;;(require 'init-rails)
 ;;(require 'init-sql)
-(require 'init-ocaml)
+;; (require 'init-ocaml)
 ;;(require 'init-j)
 ;;(require 'init-nim)
 ;;(require 'init-rust)
@@ -113,7 +113,7 @@
 (require 'init-nix)
 (maybe-require-package 'nginx-mode)
 
-(require 'init-paredit)
+;; (require 'init-paredit)
 (require 'init-lisp)
 ;; (require 'init-slime)
 ;; (require 'init-clojure)
