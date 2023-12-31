@@ -19,11 +19,18 @@
 ;; tools
 (delete-selection-mode t)
 
+;; Bind the function to a key, for example:
+(global-set-key (kbd "C-c p") 'process-markdown)
+
+
+
 (defun osx-copy (beg end)
+  "Perform copy from BEG to END to clipboard on macOS."
   (interactive "r")
   (call-process-region beg end  "pbcopy"))
 
 (defun osx-paste ()
+  "Perform paste from clipboard on macOS."
   (interactive)
   (if (region-active-p) (delete-region (region-beginning) (region-end)) nil))
 
@@ -45,6 +52,15 @@
                                                            #'launch-separate-emacs-in-terminal)))))
       (save-buffers-kill-emacs))))
 
+(defun wrap-code-in-html ()
+  "Wrap code in HTML <pre><code></code></pre> block with syntax highlighting."
+  (interactive)
+  (save-excursion
+    (let ((code (buffer-substring-no-properties (region-beginning) (region-end))))
+      (erase-buffer)
+      (insert "<pre><code>")
+      (insert (replace-regexp-in-string "&" "&amp;" (replace-regexp-in-string "<" "&lt;" (replace-regexp-in-string ">" "&gt;" code))))
+      (insert "</code></pre>"))))
 
 (defun flymacs/delete-empty-line (beg end)
   "Delete empty lines from selected BEG to END, otherwise the whole buffer."
@@ -81,10 +97,10 @@
 (setq xah-fly-use-meta-key nil
       xah-fly-use-control-key nil)
 
-(require 'xah-fly-keys)
+(require-package 'xah-fly-keys)
 
-(xah-fly-keys-set-layout "qwerty")
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
+(xah-fly-keys-set-layout "qwerty")
 (define-key xah-fly-command-map (kbd "2") 'delete-window)
 (define-key xah-fly-command-map (kbd "M-<SPC>") nil)
 (define-key xah-fly-command-map (kbd "'") 'avy-goto-line)
@@ -106,8 +122,7 @@
   :group '+modeline)
 
 (defun my-config-xah-fly-key-command ()
-  "Modify keys for xah fly key command mode keys
-to be added to `xah-fly-command-mode-activate-hook'"
+  "Modify keys for xah fly key command mode keys to be added to `xah-fly-command-mode-activate-hook'."
   (interactive)
   (setq +modeline-xah-status " C ")
   (set-face-foreground '+modeline-meta-active-face "#e78c45")
@@ -116,8 +131,7 @@ to be added to `xah-fly-command-mode-activate-hook'"
   )
 
 (defun my-config-xah-fly-key-insert ()
-  "Modify keys for xah fly key command mode keys
-to be added to `xah-fly-insert-mode-activate-hook'"
+  "Modify keys for xah fly key command mode keys to be added to `xah-fly-insert-mode-activate-hook'."
   (interactive)
   (setq +modeline-xah-status " I ")
   (set-face-foreground '+modeline-meta-active-face "#5AC896")
@@ -139,10 +153,6 @@ to be added to `xah-fly-insert-mode-activate-hook'"
 (setq c-basic-offset 4)
 (add-hook 'c-mode-hook #'aggressive-indent-mode)
 (add-hook 'c++-mode-hook #'aggressive-indent-mode)
-
-(global-whitespace-cleanup-mode 0)
-(whitespace-cleanup-mode 0)
-(add-hook 'after-init-hook (lambda () (windmove-default-keybindings)))
 
 (setq-default initial-scratch-message
               (concat ";; Happy hacking, " user-login-name " - Emacs ♥ you!\n" (format ";; Init completed in %.2fms"
@@ -458,6 +468,38 @@ to be added to `xah-fly-insert-mode-activate-hook'"
 (add-hook 'corfu-mode-hook #'corfu-prescient-mode)
 (prescient-persist-mode)
 
+(global-whitespace-cleanup-mode 0)
+(whitespace-cleanup-mode 0)
+(windmove-default-keybindings)
+
+(setq markdown-command
+      '("pandoc"
+        "--from=markdown"
+        "--to=html5"
+        "--no-highlight"
+        "--standalone=false"
+        "--html-q-tags=false"
+        "--toc=false"
+        "--wrap=none"))
+(setq markdown-enable-math t)
+(setq markdown-command-needs-filename t)
+
+(setq custom-enabled-themes '(modus-vivendi))
+
+(defun light ()
+  "Activate a light color theme."
+  (interactive)
+  (setq custom-enabled-themes '(modus-operandi))
+  (reapply-themes))
+
+(defun dark ()
+  "Activate a dark color theme."
+  (interactive)
+  (setq custom-enabled-themes '(modus-vivendi))
+  (reapply-themes))
+
+
+(message "excuted personal script")
 (provide 'init-local)
 
 ;;; init-local.el ends here
