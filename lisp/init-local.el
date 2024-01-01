@@ -98,6 +98,7 @@
       xah-fly-use-control-key nil)
 
 (require-package 'xah-fly-keys)
+(require 'xah-fly-keys)
 
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (xah-fly-keys-set-layout "qwerty")
