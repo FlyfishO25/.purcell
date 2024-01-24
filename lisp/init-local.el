@@ -13,16 +13,12 @@
 (require-package 'corfu-prescient)
 (require-package 'popper)
 (require-package 'vertico-prescient)
+;; (require-package 'vertico-posframe)
 
 (setq +modeline-xah-status " C ")
 
 ;; tools
 (delete-selection-mode t)
-
-;; Bind the function to a key, for example:
-(global-set-key (kbd "C-c p") 'process-markdown)
-
-
 
 (defun osx-copy (beg end)
   "Perform copy from BEG to END to clipboard on macOS."
@@ -46,21 +42,11 @@
   "Restart Emacs from within Emacs."
   (interactive)
   (if (eq system-type 'windows-nt)
-      (message "Sorry, this function does not support windows.")
+      (message "Windows Operating System is not supported.")
     (let ((kill-emacs-hook (append kill-emacs-hook (list (if (display-graphic-p)
                                                              #'launch-separate-emacs-under-gui
                                                            #'launch-separate-emacs-in-terminal)))))
       (save-buffers-kill-emacs))))
-
-(defun wrap-code-in-html ()
-  "Wrap code in HTML <pre><code></code></pre> block with syntax highlighting."
-  (interactive)
-  (save-excursion
-    (let ((code (buffer-substring-no-properties (region-beginning) (region-end))))
-      (erase-buffer)
-      (insert "<pre><code>")
-      (insert (replace-regexp-in-string "&" "&amp;" (replace-regexp-in-string "<" "&lt;" (replace-regexp-in-string ">" "&gt;" code))))
-      (insert "</code></pre>"))))
 
 (defun flymacs/delete-empty-line (beg end)
   "Delete empty lines from selected BEG to END, otherwise the whole buffer."
@@ -70,6 +56,7 @@
       (if (region-active-p)
           (flush-lines empty-line beg end)
         (flush-lines empty-line (point-min) (point-max))))))
+
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
   "Renames both current buffer and file it's visiting to NEW-NAME."
@@ -140,7 +127,6 @@
   ;; more here
   )
 
-
 (add-hook 'xah-fly-command-mode-activate-hook 'my-config-xah-fly-key-command)
 (add-hook 'xah-fly-insert-mode-activate-hook 'my-config-xah-fly-key-insert)
 
@@ -202,7 +188,7 @@
 
 (defface +modeline-vc-mode-active-face
   '((t (:inherit (font-lock-constant-face))))
-  "The face for vc-mode on the mode-line of an active window."
+  "The face for `vc-mode' on the mode-line of an active window."
   :group '+modeline)
 
 (defface +modeline-modification-active-face
@@ -468,10 +454,7 @@
 (vertico-prescient-mode)
 (add-hook 'corfu-mode-hook #'corfu-prescient-mode)
 (prescient-persist-mode)
-
-(global-whitespace-cleanup-mode 0)
-(whitespace-cleanup-mode 0)
-(windmove-default-keybindings)
+;; (vertico-posframe-mode)
 
 (setq markdown-command
       '("pandoc"

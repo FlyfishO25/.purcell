@@ -74,8 +74,8 @@
 (require 'init-editing-utils)
 (require 'init-whitespace)
 
-(require 'init-vc)
-(require 'init-darcs)
+;; (require 'init-vc)
+;; (require 'init-darcs)
 (require 'init-git)
 ;; (require 'init-github)
 
@@ -85,7 +85,7 @@
 (require 'init-crontab)
 (require 'init-textile)
 (require 'init-markdown)
-(require 'init-csv)
+;; (require 'init-csv)
 ;;(require 'init-erlang)
 ;;(require 'init-javascript)
 ;;(require 'init-php)
@@ -110,15 +110,15 @@
 (require 'init-yaml)
 ;;(require 'init-docker)
 ;;(require 'init-terraform)
-(require 'init-nix)
-(maybe-require-package 'nginx-mode)
+;; (require 'init-nix)
+;; (maybe-require-package 'nginx-mode)
 
 (require 'init-paredit)
 (require 'init-lisp)
 ;; (require 'init-slime)
 ;; (require 'init-clojure)
 ;; (require 'init-clojure-cider)
-(require 'init-common-lisp)
+;; (require 'init-common-lisp)
 
 (when *spell-check-support-enabled*
   (require 'init-spelling))
