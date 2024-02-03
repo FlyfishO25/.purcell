@@ -31,6 +31,12 @@
             (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
 
 
+;; Process performance tuning
+
+(setq read-process-output-max (* 4 1024 1024))
+(setq process-adaptive-read-buffering nil)
+
+
 ;; Bootstrap config
 
 
@@ -115,10 +121,7 @@
 
 (require 'init-paredit)
 (require 'init-lisp)
-;; (require 'init-slime)
-;; (require 'init-clojure)
-;; (require 'init-clojure-cider)
-;; (require 'init-common-lisp)
+(require 'init-sly)
 
 (when *spell-check-support-enabled*
   (require 'init-spelling))
@@ -127,6 +130,8 @@
 
 (require 'init-folding)
 (require 'init-dash)
+
+(require 'init-terminals)
 
 ;; Extra packages which don't require any configuration
 
