@@ -13,6 +13,7 @@
 (require-package 'corfu-prescient)
 (require-package 'popper)
 (require-package 'vertico-prescient)
+(require-package 'wakatime-mode)
 ;; (require-package 'vertico-posframe)
 
 (setq +modeline-xah-status " C ")
@@ -482,6 +483,9 @@
   (setq custom-enabled-themes '(modus-vivendi))
   (reapply-themes))
 
+(setq wakatime-api-key (shell-command-to-string "echo -n $WAKATIME_API_KEY"))
+(setq wakatime-cli-path "/opt/homebrew/bin/wakatime-cli") ;; if you use homebrew
+(global-wakatime-mode)
 
 (message "excuted personal script")
 (provide 'init-local)

@@ -59,3 +59,6 @@ site-lisp/package/
 /forge-*.sqlite
 path-cache
 .DS_Store
+node_modules
+package-lock.json
+package.json
