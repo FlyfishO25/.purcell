@@ -15,10 +15,6 @@
   (define-key flycheck-mode-map (kbd "C-c ! n") 'flycheck-next-error)
   (define-key flycheck-mode-map (kbd "C-c ! p") 'flycheck-previous-error)
   (define-key flycheck-mode-map (kbd "C-c ! c") 'flycheck-buffer))
-  (define-key flymake-mode-map (kbd "C-c ! c") 'flymake-start))
-
-(unless (version< emacs-version "28.1")
-  (setq eldoc-documentation-function 'eldoc-documentation-compose)
 
 (provide 'init-flymake)
 ;;; init-flymake.el ends here
