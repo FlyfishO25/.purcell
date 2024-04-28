@@ -13,8 +13,10 @@
 (require-package 'corfu-prescient)
 (require-package 'popper)
 (require-package 'vertico-prescient)
+(require-package 'diff-hl)
 (require-package 'wakatime-mode)
-;; (require-package 'vertico-posframe)
+(require-package 'org-roam)
+(require-package 'org-roam-ui)
 
 (setq +modeline-xah-status " C ")
 
@@ -486,6 +488,41 @@
 (setq wakatime-api-key (shell-command-to-string "echo -n $WAKATIME_API_KEY"))
 (setq wakatime-cli-path "/opt/homebrew/bin/wakatime-cli") ;; if you use homebrew
 (global-wakatime-mode)
+
+(add-hook 'after-load-theme-hook
+          (lambda ()
+            (custom-set-faces
+             `(diff-hl-change ((t (:foreground ,(face-background 'highlight) :background nil))))
+             '(diff-hl-insert ((t (:inherit diff-added :background nil))))
+             '(diff-hl-delete ((t (:inherit diff-removed :background nil)))))))
+(global-diff-hl-mode)
+(setq diff-hl-draw-borders nil)
+(diff-hl-flydiff-mode 1)
+(setq-default fringes-outside-margins t)
+;; (defun my-diff-hl-fringe-bmp-function (_type _pos)
+;;   "Fringe bitmap function for use as `diff-hl-fringe-bmp-function'."
+;;   (define-fringe-bitmap 'my-diff-hl-bmp
+;;     (vector (if (eq system-type 'darwin) #b11100000 #b11111100))
+;;     1 8
+;;     '(center t)))
+;; (setq diff-hl-fringe-bmp-function #'my-diff-hl-fringe-bmp-function)
+(when (or (not (display-graphic-p)) (daemonp))
+  ;; Fall back to the display margin since the fringe is unavailable in tty
+  (diff-hl-margin-mode 1)
+  ;; Avoid restoring `diff-hl-margin-mode'
+  (with-eval-after-load 'desktop
+    (add-to-list 'desktop-minor-mode-table
+                 '(diff-hl-margin-mode nil))))
+(with-eval-after-load 'magit
+  (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
+  (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
+(setq org-roam-directory (file-truename "~/Documents/Plan/"))
+(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+(org-roam-db-autosync-mode)
+(add-hook 'org-mode-hook (lambda () (org-indent-mode 1)))
+
+(global-set-key (kbd "C-,") 'embark-act)
 
 (message "excuted personal script")
 (provide 'init-local)
