@@ -17,6 +17,7 @@
 (require-package 'wakatime-mode)
 (require-package 'org-roam)
 (require-package 'org-roam-ui)
+(require-package 'vterm)
 
 (setq +modeline-xah-status " C ")
 
@@ -60,6 +61,14 @@
           (flush-lines empty-line beg end)
         (flush-lines empty-line (point-min) (point-max))))))
 
+(defun flymacs/open-in-luogu ()
+  "Open URL http://luogu.com.cn/problem/filename"
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if filename
+        (browse-url (concat "http://luogu.com.cn/problem/" (file-name-sans-extension (file-name-nondirectory filename))))
+      (error "Buffer is not visiting a file"))))
+
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
   "Renames both current buffer and file it's visiting to NEW-NAME."
@@ -96,7 +105,8 @@
 (define-key xah-fly-command-map (kbd "M-<SPC>") nil)
 (define-key xah-fly-command-map (kbd "'") 'avy-goto-line)
 (define-key xah-fly-command-map (kbd ",") 'ace-window)
-(define-key xah-fly-command-map (kbd "C-'") 'avy-goto-char)
+(define-key xah-fly-command-map (kbd "C-'") 'avy-goto-char-timer)
+(define-key xah-fly-command-map (kbd "`") 'eglot-code-actions)
 (define-key xah-fly-insert-map (kbd "M-<SPC>") 'xah-fly-command-mode-activate)
 (define-key xah-fly-leader-key-map (kbd "r") 'anzu-query-replace)
 
