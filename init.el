@@ -117,8 +117,8 @@
 ;;(require 'init-j)
 ;;(require 'init-nim)
 ;;(require 'init-rust)
-(require 'init-toml)
-(require 'init-yaml)
+;; (require 'init-toml)
+;; (require 'init-yaml)
 ;;(require 'init-docker)
 ;;(require 'init-terraform)
 ;; (require 'init-nix)
@@ -126,7 +126,7 @@
 
 (require 'init-paredit)
 (require 'init-lisp)
-(require 'init-sly)
+;; (require 'init-sly)
 ;; (require 'init-clojure)
 ;; (require 'init-clojure-cider)
 

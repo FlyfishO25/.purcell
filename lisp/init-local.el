@@ -18,7 +18,8 @@
 (require-package 'org-roam)
 (require-package 'org-roam-ui)
 (require-package 'vterm)
-
+(require-package 'vertico-posframe)
+(require-package 'dirvish)
 (setq +modeline-xah-status " C ")
 
 ;; tools
@@ -467,7 +468,8 @@
 (vertico-prescient-mode)
 (add-hook 'corfu-mode-hook #'corfu-prescient-mode)
 (prescient-persist-mode)
-;; (vertico-posframe-mode)
+(vertico-posframe-mode)
+(dirvish-override-dired-mode)
 
 (setq markdown-command
       '("pandoc"
@@ -477,11 +479,13 @@
         "--standalone=false"
         "--html-q-tags=false"
         "--toc=false"
-        "--wrap=none"))
+        "--wrap=none"
+        "--mathjax"))
+
 (setq markdown-enable-math t)
 (setq markdown-command-needs-filename t)
 
-(setq custom-enabled-themes '(modus-vivendi))
+(setq custom-enabled-themes '(sanityinc-tomorrow-eighties))
 
 (defun light ()
   "Activate a light color theme."
