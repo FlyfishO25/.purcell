@@ -20,10 +20,13 @@
 (require-package 'vterm)
 (require-package 'vertico-posframe)
 (require-package 'dirvish)
+(require-package 'vterm-toggle)
 (setq +modeline-xah-status " C ")
 
 ;; tools
 (delete-selection-mode t)
+
+(setq compile-base "/Users/markzhou/tools/cpp11 ")
 
 (defun osx-copy (beg end)
   "Perform copy from BEG to END to clipboard on macOS."
@@ -69,6 +72,23 @@
     (if filename
         (browse-url (concat "http://luogu.com.cn/problem/" (file-name-sans-extension (file-name-nondirectory filename))))
       (error "Buffer is not visiting a file"))))
+
+(defvar vterm-compile-buffer nil)
+(defun vterm-compile ()
+  "Compile the program including the current buffer in `vterm'."
+  (interactive)
+  (let* ((w (vterm-toggle--get-window)))
+    (setq compile-command (concat compile-base (buffer-file-name)))
+    (let ((vterm-toggle-use-dedicated-buffer t)
+          (vterm-toggle--vterm-dedicated-buffer (if w (vterm-toggle-hide)
+                                                  vterm-compile-buffer)))
+      (with-current-buffer (vterm-toggle-cd)
+        (setq vterm-compile-buffer (current-buffer))
+        (rename-buffer "*vterm compilation*")
+        (compilation-shell-minor-mode 1)
+        (vterm-send-M-w)
+        (vterm-send-string compile-command t)
+        (vterm-send-return)))))
 
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
