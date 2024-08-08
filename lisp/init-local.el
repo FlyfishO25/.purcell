@@ -15,8 +15,8 @@
 (require-package 'vertico-prescient)
 (require-package 'diff-hl)
 (require-package 'wakatime-mode)
-(require-package 'org-roam)
-(require-package 'org-roam-ui)
+;; (require-package 'org-roam)
+;; (require-package 'org-roam-ui)
 (require-package 'vterm)
 (require-package 'vertico-posframe)
 (require-package 'dirvish)
@@ -529,9 +529,9 @@
              `(diff-hl-change ((t (:foreground ,(face-background 'highlight) :background nil))))
              '(diff-hl-insert ((t (:inherit diff-added :background nil))))
              '(diff-hl-delete ((t (:inherit diff-removed :background nil)))))))
-(global-diff-hl-mode)
+
 (setq diff-hl-draw-borders nil)
-(diff-hl-flydiff-mode 1)
+(add-to-list 'after-init-hook (lambda () (diff-hl-flydiff-mode 1)))
 (setq-default fringes-outside-margins t)
 ;; (defun my-diff-hl-fringe-bmp-function (_type _pos)
 ;;   "Fringe bitmap function for use as `diff-hl-fringe-bmp-function'."
@@ -551,9 +551,9 @@
   (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
-(setq org-roam-directory (file-truename "~/Documents/Plan/"))
-(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-(org-roam-db-autosync-mode)
+;; (setq org-roam-directory (file-truename "~/Documents/Plan/"))
+;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+;; (org-roam-db-autosync-mode)
 (add-hook 'org-mode-hook (lambda () (org-indent-mode 1)))
 
 (global-set-key (kbd "C-,") 'embark-act)

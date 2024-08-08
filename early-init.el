@@ -37,6 +37,8 @@
             (setq gc-cons-threshold 100000000
                   gc-cons-percentage 0.1)))
 
+(when (fboundp 'set-scroll-bar-mode)
+  (set-scroll-bar-mode nil))
 
 ;; So we can detect this having been loaded
 (provide 'early-init)
