@@ -21,6 +21,7 @@
 (require-package 'vertico-posframe)
 (require-package 'dirvish)
 (require-package 'vterm-toggle)
+
 (setq +modeline-xah-status " C ")
 
 ;; tools
@@ -73,6 +74,8 @@
         (browse-url (concat "http://luogu.com.cn/problem/" (file-name-sans-extension (file-name-nondirectory filename))))
       (error "Buffer is not visiting a file"))))
 
+
+(require 'vterm-toggle)
 (defvar vterm-compile-buffer nil)
 (defun vterm-compile ()
   "Compile the program including the current buffer in `vterm'."
@@ -89,6 +92,7 @@
         (vterm-send-M-w)
         (vterm-send-string compile-command t)
         (vterm-send-return)))))
+
 
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
