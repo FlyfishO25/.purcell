@@ -15,11 +15,8 @@
 (require-package 'vertico-prescient)
 (require-package 'diff-hl)
 (require-package 'wakatime-mode)
-;; (require-package 'org-roam)
-;; (require-package 'org-roam-ui)
 (require-package 'vterm)
 (require-package 'vertico-posframe)
-(require-package 'dirvish)
 (require-package 'vterm-toggle)
 
 (setq +modeline-xah-status " C ")
@@ -117,12 +114,13 @@
 (ctrlf-mode 1)
 
 ;; keybinding
-(add-to-list 'load-path "site-lisp/xah-fly-keys")
+
 (setq xah-fly-use-meta-key nil
       xah-fly-use-control-key nil)
 
 (require-package 'xah-fly-keys)
-(require 'xah-fly-keys)
+(if (package-installed-p 'xah-fly-keys)
+    (require 'xah-fly-keys))
 
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (xah-fly-keys-set-layout "qwerty")
@@ -136,6 +134,7 @@
 (define-key xah-fly-leader-key-map (kbd "r") 'anzu-query-replace)
 
 (global-set-key (kbd "C-c r") 'consult-ripgrep)
+(global-set-key (kbd "C-'") 'avy-goto-char-timer)
 
 (defface +modeline-meta-active-face
   '((t (:inherit (font-lock-function-name-face bold) :inverse-video t)))
@@ -493,7 +492,7 @@
 (add-hook 'corfu-mode-hook #'corfu-prescient-mode)
 (prescient-persist-mode)
 (vertico-posframe-mode)
-(dirvish-override-dired-mode)
+;; (dirvish-override-dired-mode)
 
 (setq markdown-command
       '("pandoc"
