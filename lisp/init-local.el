@@ -16,7 +16,7 @@
 (require-package 'diff-hl)
 (require-package 'wakatime-mode)
 (require-package 'vterm)
-(require-package 'vertico-posframe)
+;; (require-package 'vertico-posframe)
 (require-package 'vterm-toggle)
 
 (setq +modeline-xah-status " C ")
@@ -491,7 +491,7 @@
 (vertico-prescient-mode)
 (add-hook 'corfu-mode-hook #'corfu-prescient-mode)
 (prescient-persist-mode)
-(vertico-posframe-mode)
+;; (vertico-posframe-mode)
 ;; (dirvish-override-dired-mode)
 
 (setq markdown-command
@@ -524,7 +524,7 @@
 
 (setq wakatime-api-key (shell-command-to-string "echo -n $WAKATIME_API_KEY"))
 (setq wakatime-cli-path "/opt/homebrew/bin/wakatime-cli") ;; if you use homebrew
-(global-wakatime-mode)
+;; (global-wakatime-mode)
 
 (add-hook 'after-load-theme-hook
           (lambda ()
@@ -553,11 +553,6 @@
 (with-eval-after-load 'magit
   (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
-
-;; (setq org-roam-directory (file-truename "~/Documents/Plan/"))
-;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-;; (org-roam-db-autosync-mode)
-(add-hook 'org-mode-hook (lambda () (org-indent-mode 1)))
 
 (global-set-key (kbd "C-,") 'embark-act)
 
