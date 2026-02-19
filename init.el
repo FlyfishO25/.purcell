@@ -116,7 +116,7 @@
 ;; (require 'init-ocaml)
 ;;(require 'init-j)
 ;;(require 'init-nim)
-;;(require 'init-rust)
+(require 'init-rust)
 ;; (require 'init-toml)
 ;; (require 'init-yaml)
 ;;(require 'init-docker)

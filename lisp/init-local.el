@@ -363,6 +363,26 @@
 (advice-add #'after-insert-file-set-coding :after #'+modeline-update-encoding)
 (advice-add #'set-buffer-file-coding-system :after #'+modeline-update-encoding)
 
+(defun +modeline-current-position-long ()
+  "Get current cursor position."
+  (if (derived-mode-p 'doc-view-mode)
+      (format " %d/%d "
+              (doc-view-current-page)
+              (doc-view-last-page-number))
+    (format " %d,%d "
+            (line-number-at-pos)
+            (current-column)))
+  )
+
+(defun +modeline-current-position-short ()
+  "Get current cursor position."
+  (if (derived-mode-p 'doc-view-mode)
+      (format " %d "
+              (doc-view-current-page))
+    (format " %d "
+            (line-number-at-pos)))
+  )
+
 (defsubst +mode-line-active-long ()
   "Formatting active-long modeline."
   (let* ((lhs `((:propertize +modeline-xah-status
@@ -391,8 +411,7 @@
                 (:eval +modeline-flymake-indicator)
                 " "
                 (:eval +modeline-encoding)
-                (:propertize " %l,%C "
-                             face +modeline-line-number-active-face)
+                (:eval (propertize (+modeline-current-position-long) 'face '+modeline-line-number-active-face))
                 " "
                 (-3 "%p")
                 "%%"))
@@ -415,10 +434,11 @@
                              face +modeline-host-name-active-face)
                 (:eval vc-mode)
                 ))
-         (rhs '((:eval mode-name)
+         (rhs '(
+                (:eval (+modeline-current-position-long))
                 " "
                 (:eval +modeline-encoding)
-                "%l,%C "
+                (+modeline-current-position nil)
                 (-3 "%p")
                 "%%"))
          (rhs-str (format-mode-line rhs))
@@ -451,8 +471,7 @@
                              face +modeline-buffer-name-active-face)
                 " "
                 (:eval +modeline-encoding)
-                (:propertize " %l "
-                             face +modeline-line-number-active-face)
+                (:eval (propertize (+modeline-current-position-short) 'face '+modeline-line-number-active-face))
                 " "
                 (-3 "%p")
                 "%%"))
@@ -471,7 +490,8 @@
                 (:propertize +modeline-remote-host-name
                              face +modeline-host-name-active-face)
                 ))
-         (rhs '(" %l  "
+         (rhs '(
+                (:eval (+modeline-current-position-short))
                 (-3 "%p")
                 "%%"))
          (rhs-str (format-mode-line rhs))
@@ -486,6 +506,7 @@
                          (if +modeline-large-width-p (+mode-line-inactive-long) (+mode-line-inactive-short))))))
 
 (setq-default header-line-format nil)
+(setq doom-modeline-icon nil)
 
 (vertico-reverse-mode)
 (vertico-prescient-mode)
