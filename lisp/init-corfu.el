@@ -21,10 +21,9 @@
   (setq-default corfu-quit-no-match 'separator)
   (add-hook 'after-init-hook 'global-corfu-mode)
 
-
-
   (with-eval-after-load 'corfu
-    (corfu-popupinfo-mode))
+    (corfu-popupinfo-mode)
+    )
 
   ;; Make Corfu also work in terminals, without disturbing usual behaviour in GUI
   (when (maybe-require-package 'corfu-terminal)

@@ -111,6 +111,7 @@
 (defface ctrlf-highlight-active
   '((t (:weight bold :foreground "medium blue" :background "#5AC896")))
   "ctrlf highlight active face")
+(setq ctrlf-default-search-style 'fuzzy)
 (ctrlf-mode 1)
 
 ;; keybinding
@@ -122,6 +123,29 @@
 (if (package-installed-p 'xah-fly-keys)
     (require 'xah-fly-keys))
 
+(defun flyfish/delete-line ()
+  "Context-sensitive line delete.
+
+If point is after first non-whitespace char:
+  kill to end of line.
+
+If point is at or before first non-whitespace char:
+  kill whole line and move to end of previous line."
+  (interactive)
+  (let* ((bol (line-beginning-position))
+         (first-non-ws
+          (save-excursion
+            (back-to-indentation)
+            (point))))
+    (if (> (point) first-non-ws)
+        ;; Kill to end of line
+        (kill-line)
+      ;; Kill whole line and jump to previous line end
+      (kill-whole-line)
+      (when (not (bobp))
+        (forward-line -1)
+        (end-of-line)))))
+
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (xah-fly-keys-set-layout "qwerty")
 (define-key xah-fly-command-map (kbd "2") 'delete-window)
@@ -132,6 +156,10 @@
 (define-key xah-fly-command-map (kbd "`") 'eglot-code-actions)
 (define-key xah-fly-insert-map (kbd "M-<SPC>") 'xah-fly-command-mode-activate)
 (define-key xah-fly-leader-key-map (kbd "r") 'anzu-query-replace)
+(define-key xah-fly-command-map (kbd "<SPC>-y") 'ctrlf-forward-symbol-at-point)
+(define-key xah-fly-leader-key-map (kbd "g g") 'flyfish/delete-line)
+;; (define-key xah-fly-command-map (kbd "3") 'delete-other-windows)
+;; (define-key xah-fly-command-map (kbd "4") 'split-window-below)
 
 (global-set-key (kbd "C-c r") 'consult-ripgrep)
 (global-set-key (kbd "C-'") 'avy-goto-char-timer)
@@ -147,7 +175,7 @@
   :group '+modeline)
 
 (defun my-config-xah-fly-key-command ()
-  "Modify keys for xah fly key command mode keys to be added to `xah-fly-command-mode-activate-hook'."
+  "Change xah-fly-key indicator to C(Command)."
   (interactive)
   (setq +modeline-xah-status " C ")
   (set-face-foreground '+modeline-meta-active-face "#e78c45")
@@ -156,7 +184,7 @@
   )
 
 (defun my-config-xah-fly-key-insert ()
-  "Modify keys for xah fly key command mode keys to be added to `xah-fly-insert-mode-activate-hook'."
+  "Change xah-fly-key indicator to I(insert)."
   (interactive)
   (setq +modeline-xah-status " I ")
   (set-face-foreground '+modeline-meta-active-face "#5AC896")
