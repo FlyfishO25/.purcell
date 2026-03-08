@@ -16,6 +16,7 @@
 (require-package 'diff-hl)
 (require-package 'wakatime-mode)
 (require-package 'vterm)
+(require-package 'expand-region)
 ;; (require-package 'vertico-posframe)
 (require-package 'vterm-toggle)
 
@@ -146,19 +147,27 @@ If point is at or before first non-whitespace char:
         (forward-line -1)
         (end-of-line)))))
 
+
 (define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (xah-fly-keys-set-layout "qwerty")
 (define-key xah-fly-command-map (kbd "2") 'delete-window)
 (define-key xah-fly-command-map (kbd "M-<SPC>") nil)
-(define-key xah-fly-command-map (kbd "'") 'avy-goto-line)
+(define-key xah-fly-command-map (kbd "'") 'avy-goto-char-timer)
 (define-key xah-fly-command-map (kbd ",") 'ace-window)
-(define-key xah-fly-command-map (kbd "C-'") 'avy-goto-char-timer)
+(define-key xah-fly-command-map (kbd "C-'") 'avy-goto-line)
 (define-key xah-fly-command-map (kbd "`") 'eglot-code-actions)
 (define-key xah-fly-insert-map (kbd "M-<SPC>") 'xah-fly-command-mode-activate)
 (define-key xah-fly-leader-key-map (kbd "r") 'anzu-query-replace)
-(define-key xah-fly-command-map (kbd "<SPC>-y") 'ctrlf-forward-symbol-at-point)
+(define-key xah-fly-leader-key-map (kbd "y") 'ctrlf-forward-symbol-at-point)
 (define-key xah-fly-leader-key-map (kbd "g g") 'flyfish/delete-line)
-;; (define-key xah-fly-command-map (kbd "3") 'delete-other-windows)
+(define-key xah-fly-command-map (kbd "[") 'xah-unsplit-window-or-next-frame)
+(define-key xah-fly-command-map (kbd "3") 'mc/mark-previous-like-this)
+(define-key xah-fly-command-map (kbd "4") 'mc/mark-next-like-this)
+(define-key xah-fly-command-map (kbd "5") 'mc/mark-all-like-this)
+(define-key xah-fly-leader-key-map (kbd "s") 'consult-ripgrep)
+;; (define-key xah-fly-leader-key-map (kbd "g b") 'flyfish/select-inside-bracket)
+(define-key xah-fly-leader-key-map (kbd "g .") 'exchange-point-and-mark)
+(define-key xah-fly-command-map (kbd "g") 'er/expand-region)
 ;; (define-key xah-fly-command-map (kbd "4") 'split-window-below)
 
 (global-set-key (kbd "C-c r") 'consult-ripgrep)
@@ -207,8 +216,11 @@ If point is at or before first non-whitespace char:
 (add-hook 'c++-mode-hook #'aggressive-indent-mode)
 
 (setq-default initial-scratch-message
-              (concat ";; Happy hacking, " user-login-name " - Emacs ♥ you!\n" (format ";; Init completed in %.2fms"
-                                                                                       (sanityinc/time-subtract-millis after-init-time before-init-time))))
+              (concat ";; Happy hacking, " user-login-name " - Emacs ♥ you!\n" 
+                      (format ";; Init completed in %.2fms with %d packages."
+                              (sanityinc/time-subtract-millis after-init-time before-init-time)
+                              (length package-activated-list)
+                              )))
 
 (unless (display-graphic-p)
   (require-package 'corfu-terminal)
