@@ -7,6 +7,7 @@
 ;;; Code:
 
 (setq exec-path-from-shell-arguments (list "-l"))
+(set-frame-font "Menlo 18" nil t)
 
 (provide 'init-preload-local)
 

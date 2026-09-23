@@ -26,6 +26,8 @@
 (delete-selection-mode t)
 
 (setq compile-base "/Users/markzhou/tools/cpp11 ")
+(setq run-base "./")
+(setq compile-command "/Users/markzhou/tools/cpp11 ")
 
 (defun osx-copy (beg end)
   "Perform copy from BEG to END to clipboard on macOS."
@@ -91,6 +93,23 @@
         (vterm-send-string compile-command t)
         (vterm-send-return)))))
 
+(defun vterm-compile-run ()
+  "Compile then run the program including the current buffer in `vterm'."
+  (interactive)
+  (setq run-command (concat run-base (file-name-base buffer-file-name)))
+  (let* ((w (vterm-toggle--get-window)))
+    (setq compile-command (concat compile-base (buffer-file-name)))
+    (let ((vterm-toggle-use-dedicated-buffer t)
+          (vterm-toggle--vterm-dedicated-buffer (if w (vterm-toggle-hide)
+                                                  vterm-compile-buffer)))
+      (with-current-buffer (vterm-toggle-cd)
+        (setq vterm-compile-buffer (current-buffer))
+        (rename-buffer "*vterm compilation*")
+        (compilation-shell-minor-mode 1)
+        (vterm-send-M-w)
+        (vterm-send-string run-command t)
+        (vterm-send-return)))))
+
 
 (defun rename-this-file (new-name)
   ;; from https://github.com/seagle0128/.emacs.d/blob/754eb554ca2dd22807898bd5a4257a57f6ab5cfd/lisp/init-funcs.el#L97
@@ -147,10 +166,11 @@ If point is at or before first non-whitespace char:
         (forward-line -1)
         (end-of-line)))))
 
-
-(define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
 (xah-fly-keys-set-layout "qwerty")
-(define-key xah-fly-command-map (kbd "2") 'delete-window)
+(define-key xah-fly-command-map (kbd "n") 'ctrlf-forward-default)
+(define-key xah-fly-command-map (kbd "2") 'xah-unsplit-window-or-next-frame)
+(define-key xah-fly-command-map (kbd "1") 'delete-frame)
+(define-key xah-fly-command-map (kbd "Y") 'undo-redo)
 (define-key xah-fly-command-map (kbd "M-<SPC>") nil)
 (define-key xah-fly-command-map (kbd "'") 'avy-goto-char-timer)
 (define-key xah-fly-command-map (kbd ",") 'ace-window)
@@ -569,7 +589,7 @@ If point is at or before first non-whitespace char:
 (setq markdown-enable-math t)
 (setq markdown-command-needs-filename t)
 
-(setq custom-enabled-themes '(sanityinc-tomorrow-eighties))
+(setq custom-enabled-themes '(sanityinc-tomorrow-night))
 
 (defun light ()
   "Activate a light color theme."
@@ -616,6 +636,85 @@ If point is at or before first non-whitespace char:
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
 (global-set-key (kbd "C-,") 'embark-act)
+
+;; --- Eglot ---
+(setq eglot-ignored-server-capabilities
+      '(:documentOnTypeFormattingProvider))
+
+;; --- Steam Game Launcher ---
+(defvar my-game-list
+  '((:name "Balatro" :id 2379780 :os mac)
+    (:name "Disco Eysium" :id 632470 :os mac)
+    (:name "Hades" :id 1145360 :os mac)
+    (:name "Counter-Strike 2" :id 730 :os crossover)
+    (:name "Celeste" :id 504230 :os mac)
+    (:name "FEZ" :id 224760 :os mac)
+    (:name "RUNNING WITH RIFLES" :id 270150 :os mac)
+    (:name "Mini Motorways" :id 1127500 :os mac)
+    (:name "Thronefall" :id 2239150 :os mac)
+    (:name "Hollow Knight" :id 367520 :os mac)
+    (:name "Monster Hunter: World" :id 582010 :os crossover)
+    (:name "Red Dead Redemption 2" :id 1174180 :os crossover)
+    ))
+
+(defun my--run-crossover-game (game-id)
+  (let* ((script
+          (format
+           "#!/bin/bash
+
+export PYTHONPATH=\"/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/lib/python\"
+export COMMAND_MODE=\"unix2003\"
+export XPC_SERVICE_NAME=\"application.com.codeweavers.CrossOver.94969528.94981241\"
+export CX_APP_BUNDLE_PATH=\"/Applications/CrossOver.app\"
+export CX_BOTTLE_PATH=\"/Users/markzhou/Library/Application Support/CrossOver/Bottles\"
+export CX_MANAGED_BOTTLE_PATH=\"/Library/Application Support/CrossOver/Bottles\"
+export __CFBundleIdentifier=\"com.codeweavers.CrossOver\"
+export SSH_AUTH_SOCK=\"/private/tmp/com.apple.launchd.1yCxlEuGM4/Listeners\"
+export CX_ROOT=\"/Applications/CrossOver.app/Contents/SharedSupport/CrossOver\"
+export XPC_FLAGS=\"0x0\"
+export TMPDIR=\"/var/folders/7g/j423s5p15mddt7h4m8rwq5700000gn/T/\"
+export http_proxy=\"http://127.0.0.1:7897/\"
+export CX_BOTTLE=\"Steam\"
+
+export PATH=\"/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin:$PATH\"
+
+cd \"/Users/markzhou/Library/Application Support/CrossOver/Bottles/Steam/drive_c/Program Files (x86)/Steam\"
+
+wine --cx-app steam.exe \"steam://rungameid/%s\"
+"
+           game-id))
+         (tmp-file "/tmp/emacs-crossover-game.sh"))
+    (with-temp-file tmp-file
+      (insert script))
+    (set-file-modes tmp-file #o755)
+    (start-process "crossover-game" "*crossover-game*" "/bin/bash" tmp-file)))
+
+(defun my--run-mac-game (game-id)
+  (start-process
+   "steam-game"
+   "*steam-game*"
+   "open"
+   (format "steam://rungameid/%s" game-id)))
+
+(defun my--launch-game (entry)
+  (let ((id (plist-get entry :id))
+        (os (plist-get entry :os)))
+    (pcase os
+      ('mac (my--run-mac-game id))
+      ('crossover (my--run-crossover-game id))
+      (_ (message "Unknown OS type: %s" os)))))
+
+(defun launch-steam-game ()
+  "Select a game using Vertico and launch it."
+  (interactive)
+  (let* ((names (mapcar (lambda (g) (plist-get g :name)) my-game-list))
+         (choice (completing-read "Launch game: " names nil t))
+         (entry (seq-find (lambda (g)
+                            (string= (plist-get g :name) choice))
+                          my-game-list)))
+    (if entry
+        (my--launch-game entry)
+      (message "Game not found"))))
 
 (message "excuted personal script")
 (provide 'init-local)
