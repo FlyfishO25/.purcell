@@ -58,3 +58,9 @@ site-lisp/package/
 /projects
 /forge-*.sqlite
 /projectile.cache
+/node_modules
+/org-roam.db
+/package-lock.json
+/package.json
+/path-cache
+/site-lisp/xah-fly-keys
