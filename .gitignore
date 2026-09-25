@@ -64,3 +64,9 @@ package-lock.json
 package.json
 org-roam.db
 /projectile.cache
+/node_modules
+/org-roam.db
+/package-lock.json
+/package.json
+/path-cache
+/site-lisp/xah-fly-keys
