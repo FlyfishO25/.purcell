@@ -1,0 +1,1 @@
+(("/Users/markzhou/Documents/Projects/TapTap/GameJam2026/zhongshengxu-raylib/" ("src/dialogue.hpp" 1 1791039371) ("src/ui.cpp" 1 1791036811) ("src/main.cpp" 1 1791036722)) ("/Users/markzhou/.emacs.d/" ("lisp/init-elpa.el" 1 1790653815) (".bookmarks.el" 2 1790653805) ("custom.el" 4 1790653757)))
