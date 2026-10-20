@@ -650,6 +650,9 @@ If point is at or before first non-whitespace char:
 (setq eglot-ignored-server-capabilities
       '(:documentOnTypeFormattingProvider))
 
+;; --- Emacs Anywhere ---
+(setq emacs-anywhere-frame-position 'mouse)
+
 ;; --- Steam Game Launcher ---
 ;; (defvar my-game-list
 ;;   '((:name "Balatro" :id 2379780 :os mac)
